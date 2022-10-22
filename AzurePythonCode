@@ -4,14 +4,19 @@ trigger:
 pool: Mypool
 steps:
 - script: |
-    python3 -m pip install --upgrade pip setuptools wheel
+    sudo apt install python3-pip -y 
+  displayName: 'Install Python'
+- script: |
+    python -m pip install --upgrade pip
     pip install -r requirements.txt
   displayName: 'Install dependencies'
-
 - script: |
     pip install pytest pytest-azurepipelines
+  displayName: 'pytest'
+- script: |
     pip install pytest-cov
-    sudo apt install python-pytest
+  displayName: 'install pytest'
+- script: |
     pytest test_test1.py
   displayName: 'pytest'
 
