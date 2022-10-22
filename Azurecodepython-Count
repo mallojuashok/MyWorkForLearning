@@ -1,0 +1,21 @@
+---
+trigger:
+- master
+pool: Mypool
+steps:
+- script: |
+    sudo apt install python3-pip -y 
+  displayName: 'Install Python'
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+- script: |
+    pip install pytest pytest-azurepipelines
+  displayName: 'pytest'
+- script: |
+    pip install tox
+  displayName: 'install tox'
+- script: |
+    tox -e py
+  displayName: 'run tox'
