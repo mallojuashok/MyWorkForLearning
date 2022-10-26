@@ -1,0 +1,34 @@
+#Create Resource Group
+$res_grp_name= 'FromAzClI'
+$location= 'Central US'
+$Addres= '192.168.0.0/16'
+New-AzResourceGroup -Name $res_grp_name -Location $location
+
+#Creating Subnet
+$subnet=New-AzVirtualNetworkSubnetConfig -Name 'CliWeb' -AddressPrefix '192.168.0.0/24'
+
+#Creating Vnet
+
+$vnet=New-AzVirtualNetwork -Name 'CliVN' -ResourceGroupName $res_grp_name  `
+                     -Location $location -AddressPrefix $Addres -Subnet $subnet
+
+#Creating Nsg 
+
+$NsgPri= New-AzNetworkSecurityGroup -Name 'internalprimary' `
+          -ResourceGroupName $res_grp_name `
+          -Location $location
+# Adding Nsg For Subnet
+Set-AzVirtualNetworkSubnetConfig  -Name CliWeb -VirtualNetwork $vnet `
+   -AddressPrefix 192.168.0.0/24 -NetworkSecurityGroupId $NsgPri.Id `
+
+   $vnet | Set-AzVirtualNetwork
+   
+$rdpRule = New-AzNetworkSecurityRuleConfig -Name MyRdP -Access Allow `
+-Protocol Tcp -Direction Inbound -Priority 500 -SourcePortRange * `
+-DestinationAddressPrefix * -DestinationPortRange 8080
+
+#Creating VmS
+New-AzVM -Name 'CliVM' -ResourceGroupName $res_grp_name -Location $location `
+        -VirtualNetworkName $vnet -SubnetName $subnet `
+         -SecurityGroupName $NsgPri -Image UbuntuLTS -Size Standard_B1s
+    
